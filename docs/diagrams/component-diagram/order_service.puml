@@ -1,0 +1,19 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(orderService, "Order Service", "Java Spring Boot")
+
+Component(controller, "OrderController", "REST", "Receives order HTTP requests")
+Component(service, "OrderService", "Java", "Order business logic")
+Component(repo, "OrderRepository", "MySQL", "CRUD operations")
+Component(kafkaProd, "KafkaProducer", "Publishes domain events")
+Component(kafkaCons, "KafkaConsumer", "Listens to inventory & payment events")
+Component(validator, "OrderValidator", "Validation rules")
+
+Rel(controller, service, "Delegates requests")
+Rel(service, repo, "Read/write order data")
+Rel(service, validator, "Validates payload")
+Rel(service, kafkaProd, "Publishes events")
+Rel(kafkaCons, service, "Triggers business logic when events arrive")
+
+@enduml

@@ -1,0 +1,19 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(pay, "Payment Service", "Java")
+
+Component(payCons, "KafkaConsumer")
+Component(payService, "PaymentService")
+Component(validator, "PaymentValidatorEngine")
+Component(repo, "PaymentRepository")
+Component(gateway, "PaymentGatewayClient")
+Component(payProd, "KafkaProducer")
+
+Rel(payCons, payService, "On PaymentInitiationRequested")
+Rel(payService, validator, "Validate payment")
+Rel(payService, repo, "Store payment states")
+Rel(payService, gateway, "Call external gateway")
+Rel(payService, payProd, "Emit payment events")
+
+@enduml

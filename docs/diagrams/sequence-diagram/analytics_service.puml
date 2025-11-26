@@ -1,0 +1,35 @@
+@startuml
+title Analytics Service - Full Sequence Flow
+
+actor User as U
+participant "Security Filter" as SF
+participant Controller as C
+participant AnalyticsService as AS
+database AnalyticsRepository as AR
+participant KafkaConsumer as KC
+
+== Asynchronous Event Ingestion ==
+
+loop For Each Incoming Event
+    KC -> AS: StockUpdateEvent / OrderConfirmedEvent /\nOrderCancelledEvent / PaymentInitiationRequestedEvent /\nPaymentSuccessEvent / PaymentFailureEvent /\nSuspiciousPaymentEvent / SuspiciousStockUpdateEvent
+    AS -> AR: Store event data\n(logs, metrics, snapshots)
+end
+
+== Admin/Vendor Dashboard or Report Request ==
+
+U -> SF: HTTP Request (dashboard/report data)
+SF -> SF: Validate security filters\nRate limit, IP, Token, Role
+SF --> C: Forward if valid
+
+C -> AS: Request analytics data\n(query parameters)
+AS -> AS: Validate payload
+
+AS -> AR: Fetch data / logs
+AR --> AS: Raw analytics data
+
+AS -> AS: Process / aggregate / summarize analytics
+
+AS --> C: Analytics response
+C --> U: Return dashboard/report data
+
+@enduml

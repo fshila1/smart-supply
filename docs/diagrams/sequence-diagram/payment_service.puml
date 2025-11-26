@@ -1,0 +1,52 @@
+@startuml
+title Payment Service – Canonical Payment Flow
+
+actor KafkaConsumer as KC
+participant PaymentService as PS
+database PaymentRepository as PR
+participant PaymentValidatorEngine as PVE
+participant PaymentGatewayAPI as PG
+participant KafkaProducer as KP
+
+== Payment Initiation ==
+
+KC -> PS : PaymentInitiationRequestedEvent
+PS -> PR : save(payment, status=INITIATED)
+
+== Validation ==
+
+PS -> PVE : validate(payment info, method)
+PVE --> PS : validation result
+
+alt Validation Failed
+    PS -> PR : update status=INVALID
+    PS -> KP : emit PaymentFailureEvent(reason="validation_failed")
+    return
+else Validation OK
+    PS -> PR : update status=PROCESSING
+end
+
+== Gateway Call ==
+
+PS -> PG : initiatePayment(payment data)
+PG --> PS : PaymentResult(SUCCESS|FAILED|PENDING|TIMEOUT|ERROR)
+
+== Update Status ==
+
+PS -> PR : update payment status based on result
+
+== Emit Events ==
+
+alt SUCCESS
+    PS -> KP : emit PaymentSuccessEvent
+else FAILURE
+    PS -> KP : emit PaymentFailureEvent(reason=gateway_result)
+end
+
+== Suspicious Activity ==
+
+alt suspicious patterns detected
+    PS -> KP : emit SuspiciousPaymentEvent
+end
+
+@enduml

@@ -1,0 +1,113 @@
+@startuml
+' ARCH_DIAGRAM_IMAGE_URL: /mnt/data/A_system_architecture_diagram_in_digital_vector_gr.png
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Title SmartSupply — Components (Order, Inventory, Payment, Notification, Analytics, Fraud)
+
+Container(orderService, "Order Service", "Java, Spring", "Orchestrates order lifecycle") {
+  Component(orderController, "OrderController", "REST Controller", "Exposes order endpoints")
+  Component(orderServiceCore, "OrderService", "Domain Service", "Business logic, state transitions")
+  Component(orderRepo, "OrderRepository", "JPA Repository", "Persist orders & history")
+  Component(orderKafkaProducer, "OrderEventProducer", "Kafka Producer", "Publishes domain events (order.created, payment.initiated)")
+  Component(orderKafkaConsumer, "OrderEventConsumer", "Kafka Consumer", "Consumes (stock.reserved, payment.*)")
+  Component(outbox, "OutboxWorker", "Background Worker", "Reliable event publishing")
+}
+
+Container(inventoryService, "Inventory Service", "Java, Spring", "Manages stock and reservations") {
+  Component(inventoryController, "InventoryController", "REST Controller", "Admin & vendor ops")
+  Component(inventoryCore, "InventoryService", "Domain Service", "Reservation, release, threshold logic")
+  Component(inventoryRepo, "InventoryRepository", "JPA Repository", "product_stock, stock_reservations")
+  Component(reservationEngine, "ReservationEngine", "Component", "Implements TTL & reservation lifecycle")
+  Component(ruleEngine, "StockAlertRuleEngine", "Rules Engine", "Low stock & suspicious update rules")
+  Component(invKafkaProducer, "InventoryEventProducer", "Kafka Producer", "Publishes stock.reserved, stock.failed, low.stock")
+  Component(invKafkaConsumer, "InventoryEventConsumer", "Kafka Consumer", "Consumes order.created, order.confirmed, order.cancelled")
+}
+
+Container(paymentService, "Payment Service", "Java, Spring", "Handles payment processing") {
+  Component(paymentConsumer, "PaymentEventConsumer", "Kafka Consumer", "Listens to payment initiation events")
+  Component(paymentCore, "PaymentService", "Domain Service", "Validate & process payments")
+  Component(paymentRepo, "PaymentRepository", "JPA Repository", "payments table")
+  Component(paymentValidator, "PaymentValidatorEngine", "Validation", "Validate payment method & info")
+  Component(gatewayClient, "PaymentGatewayClient", "External Adapter", "Calls 3rd party gateway, idempotent calls")
+  Component(paymentProducer, "PaymentEventProducer", "Kafka Producer", "Publishes payment.success/failure")
+}
+
+Container(notificationService, "Notification Service", "Java, Spring", "Sends multi-channel notifications") {
+  Component(notificationController, "NotificationController", "REST Controller", "Operational APIs")
+  Component(notifCore, "NotificationService", "Domain Service", "Routing, templates, user prefs")
+  Component(configService, "NotificationConfigService", "Config Loader", "Templates, keys")
+  Component(resilienceManager, "NotificationResilienceManager", "Retry & DLQ", "Retry policies, backoff")
+  Component(pushSender, "PushSender", "Adapter", "Push API")
+  Component(emailSender, "EmailSender", "Adapter", "Email provider API")
+  Component(smsSender, "SmsSender", "Adapter", "SMS provider API")
+  Component(notifRepo, "NotificationRepository", "JPA", "notification logs")
+  Component(notifKafkaConsumer, "NotificationEventConsumer", "Kafka Consumer", "Consumes domain events")
+}
+
+Container(analyticsService, "Analytics Service", "Java, Spring / ClickHouse", "Ingests events & provides BI") {
+  Component(analyticsConsumer, "AnalyticsEventConsumer", "Kafka Consumer", "Ingests domain events")
+  Component(analyticsRepo, "AnalyticsRepository", "Time-series DB", "Writes denormalized analytics")
+  Component(reportEngine, "ReportEngine", "Batch & Ad-hoc", "Aggregation & reports")
+  Component(dashboardApi, "DashboardAPI", "REST", "Serves dashboard queries")
+}
+
+Container(fraudService, "Fraud Detection Service", "Java, Spring", "Detects anomalies") {
+  Component(fraudConsumer, "FraudEventConsumer", "Kafka Consumer", "Consumes suspicious events")
+  Component(fraudCore, "FraudDetectionService", "Domain Service", "Applies rules/ML models")
+  Component(fraudRepo, "FraudRepository", "JPA", "Fraud logs & rule configs")
+  Component(fraudRuleEngine, "FraudRuleEngine", "Rules Engine", "Rule execution & scoring")
+  Component(fraudProducer, "FraudEventProducer", "Kafka Producer", "Emits fraud.detected events")
+}
+
+' Relationships - Order Service
+Rel(user, orderController, "HTTP")
+Rel(orderController, orderServiceCore, "calls")
+Rel(orderServiceCore, orderRepo, "reads/writes")
+Rel(orderServiceCore, outbox, "writes outbox rows")
+Rel(outbox, orderKafkaProducer, "publishes events")
+Rel(orderKafkaConsumer, orderServiceCore, "delivers events")
+
+' Order -> Inventory
+Rel(orderKafkaProducer, invKafkaConsumer, "order.created → reserve stock")
+Rel(invKafkaProducer, orderKafkaConsumer, "stock.reserved/failed → order")
+
+' Order -> Payment
+Rel(orderServiceCore, paymentProducer, "payment.initiation.requested (via outbox)")
+Rel(paymentConsumer, paymentCore, "receives payment initiation")
+
+' Inventory components interactions
+Rel(inventoryController, inventoryCore, "calls")
+Rel(inventoryCore, inventoryRepo, "reads/writes")
+Rel(inventoryCore, reservationEngine, "manages TTL")
+Rel(inventoryCore, ruleEngine, "checks thresholds")
+Rel(inventoryCore, invKafkaProducer, "publishes events")
+Rel(invKafkaConsumer, inventoryCore, "consumes events")
+
+' Payment components
+Rel(paymentCore, paymentRepo, "reads/writes")
+Rel(paymentCore, paymentValidator, "validates")
+Rel(paymentCore, gatewayClient, "calls")
+Rel(paymentCore, paymentProducer, "publishes results")
+
+' Notification components
+Rel(notifKafkaConsumer, notifCore, "consumes domain events")
+Rel(notifCore, configService, "loads templates & keys")
+Rel(notifCore, resilienceManager, "handles failures")
+Rel(notifCore, emailSender, "sends")
+Rel(notifCore, smsSender, "sends")
+Rel(notifCore, pushSender, "sends")
+Rel(notifCore, notifRepo, "logs")
+
+' Analytics components
+Rel(analyticsConsumer, analyticsRepo, "writes events")
+Rel(reportEngine, analyticsRepo, "reads data")
+Rel(dashboardApi, reportEngine, "requests reports")
+
+' Fraud components
+Rel(fraudConsumer, fraudCore, "consumes suspicious events")
+Rel(fraudCore, fraudRepo, "stores logs")
+Rel(fraudCore, fraudRuleEngine, "applies rules")
+Rel(fraudCore, fraudProducer, "publishes fraud.detected")
+
+@enduml

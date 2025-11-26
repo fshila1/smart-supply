@@ -1,0 +1,35 @@
+@startuml
+title Fraud Detection Service - Sequence Diagram
+
+actor KafkaConsumer as KC
+participant FraudDetectionService as FDS
+participant FraudConfigService as FCS
+participant FraudRuleEngine as FRE
+participant FraudLogRepository as FLR
+participant KafkaProducer as KP
+
+== Event Listening ==
+KC -> FDS : SuspiciousPaymentEvent\nSuspiciousStockUpdateEvent\nLowStockEvent
+
+== Load Fraud Rules ==
+FDS -> FCS : loadFraudRules()
+FCS --> FDS : fraudRules
+
+== Fraud Evaluation ==
+FDS -> FRE : evaluate(event, fraudRules)
+FRE --> FDS : evaluationResult (fraud / not fraud)
+
+== Log the Event ==
+FDS -> FLR : saveFraudLog(event, evaluationResult)
+FLR --> FDS : logSaved
+
+== Conditional Fraud Event Emission ==
+alt Payment fraud detected
+    FDS -> KP : PaymentFraudDetectedEvent
+end
+
+alt Stock fraud detected
+    FDS -> KP : StockFraudDetectedEvent
+end
+
+@enduml

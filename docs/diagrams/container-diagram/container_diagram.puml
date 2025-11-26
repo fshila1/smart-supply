@@ -1,0 +1,63 @@
+@startuml
+' Reference to your uploaded diagram file (local path)
+' ARCH_DIAGRAM_IMAGE_URL: /mnt/data/A_system_architecture_diagram_in_digital_vector_gr.png
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Title SmartSupply — Container / Service Architecture (C4 Container)
+
+Person(user, "User", "Admin/Vendor/Customer via Web or Mobile")
+Person(admin, "Admin", "Product & Inventory manager")
+Person(vendor, "Vendor", "Vendor user")
+
+System_Boundary(smartSupply, "SmartSupply System") {
+  Container(orderService, "Order Service", "Java, Spring", "Handles order creation, orchestration (saga), order state machine")
+  Container(inventoryService, "Inventory Service", "Java, Spring", "Manages product stock, reservations, thresholds, rule engine")
+  Container(paymentService, "Payment Service", "Java, Spring", "Validates & processes payments; integrates with external gateway")
+  Container(notificationService, "Notification Service", "Java, Spring", "Sends email/SMS/push; retry & DLQ")
+  Container(analyticsService, "Analytics Service", "Java, Spring / ClickHouse", "Event ingestion, dashboards, reports")
+  Container(fraudService, "Fraud Detection Service", "Java, Spring", "Evaluates suspicious events, emits fraud events")
+  Container(authService, "Authentication Service", "Java, Spring Security", "JWT tokens, user roles")
+
+  ContainerDb(orderDb, "Order DB", "MySQL", "Orders, items, statuses, status history")
+  ContainerDb(inventoryDb, "Inventory DB", "MySQL", "Product stock, reservations")
+  ContainerDb(paymentDb, "Payment DB", "MySQL", "Payment records & attempts")
+  ContainerDb(notificationDb, "Notification DB", "MySQL", "Notification logs / statuses")
+  ContainerDb(analyticsDb, "Analytics DB", "ClickHouse/ES", "Analytics/BI data")
+  ContainerDb(fraudDb, "Fraud DB", "MySQL", "Fraud logs & rules")
+  Container(kafka, "Kafka Cluster", "Apache Kafka", "Event streaming backbone")
+  Container(redis, "Redis", "Redis", "Cache, retry queue, short-lived state")
+}
+
+System_Ext(paymentGateway, "Payment Gateway", "External payment provider API")
+System_Ext(emailSmsProvider, "Email/SMS Provider", "External notification provider")
+
+Rel(user, orderService, "Creates orders via REST API")
+Rel(admin, inventoryService, "Manage products & stock via REST")
+Rel(vendor, inventoryService, "Update stock / view dashboard")
+
+Rel(orderService, orderDb, "Reads/Writes")
+Rel(orderService, kafka, "Publishes events (order.created, payment.initiated...)")
+Rel(kafka, orderService, "Consumes events (stock.reserved, payment.*)")
+
+Rel(inventoryService, inventoryDb, "Reads/Writes")
+Rel(kafka, inventoryService, "Consumes (order.created, order.cancelled, order.confirmed)\nPublishes (stock.reserved, stock.failed, low.stock, suspicious)")
+
+Rel(paymentService, paymentDb, "Reads/Writes")
+Rel(kafka, paymentService, "Consumes (payment.initiation.requested)\nPublishes (payment.success, payment.failure, suspicious.payment)")
+Rel(paymentService, paymentGateway, "Calls API to process payment")
+
+Rel(notificationService, notificationDb, "Reads/Writes logs")
+Rel(kafka, notificationService, "Consumes events (order.*, payment.*, stock.*) to send messages")
+Rel(notificationService, emailSmsProvider, "Sends emails/SMS/Push")
+
+Rel(analyticsService, analyticsDb, "Writes analytics data")
+Rel(kafka, analyticsService, "Consumes domain events for analytics and reporting")
+
+Rel(fraudService, fraudDb, "Reads/Writes fraud rules & logs")
+Rel(kafka, fraudService, "Consumes suspicious events; Publishes fraud.detected events")
+
+Rel(authService, orderService, "Validates JWT for APIs")
+Rel(authService, paymentService, "Validates API requests/tokens")
+
+@enduml

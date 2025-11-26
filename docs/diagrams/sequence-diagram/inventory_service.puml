@@ -1,0 +1,92 @@
+@startuml
+title Inventory Service – Full Sequence Flow
+
+actor User
+participant Controller
+participant SecurityFilter
+participant InventoryService
+participant InventoryRepository
+participant StockAlertRuleEngine
+queue KafkaProducer
+queue KafkaConsumer
+
+== 1. Synchronous Stock Check During Order Creation ==
+
+User -> SecurityFilter: HTTP Request (Check stock)
+SecurityFilter -> Controller: Valid request
+Controller -> InventoryService: checkStock(productId, qty)
+InventoryService -> InventoryRepository: findStock(productId)
+InventoryRepository --> InventoryService: stock data
+InventoryService --> Controller: return stock availability
+Controller --> User: stock info
+
+== 2. Asynchronous Stock Reservation Request ==
+
+KafkaConsumer -> InventoryService: StockReservationRequestedEvent
+InventoryService -> InventoryRepository: decreaseProductStock(productId, qty)
+InventoryService -> InventoryRepository: insertReservation(orderId, productId, qty, STATUS=RESERVED)
+
+alt Reservation Success
+    InventoryService -> KafkaProducer: StockReservedEvent
+else Reservation Failed
+    InventoryService -> KafkaProducer: StockReservationFailedEvent
+end
+
+== 3. Order Confirmed ⇒ Convert Reserved Stock to SOLD ==
+
+KafkaConsumer -> InventoryService: OrderConfirmedEvent
+InventoryService -> InventoryRepository: updateReservation(orderId, STATUS=SOLD)
+InventoryService -> InventoryRepository: finalizeStockReduction(productId, qty)
+
+InventoryService -> StockAlertRuleEngine: evaluateStockRules(productId)
+StockAlertRuleEngine --> InventoryService: rule evaluation result
+
+InventoryService -> KafkaProducer: StockUpdateEvent
+
+alt Low stock condition
+    InventoryService -> KafkaProducer: LowStockEvent
+end
+
+alt Suspicious stock update
+    InventoryService -> KafkaProducer: SuspiciousStockUpdateEvent
+end
+
+== 4. Order Cancelled ⇒ Release Reserved Stock ==
+
+KafkaConsumer -> InventoryService: OrderCancelledEvent
+InventoryService -> InventoryRepository: checkReservation(orderId)
+
+alt Reservation Exists
+    InventoryService -> InventoryRepository: updateReservation(orderId, STATUS=CANCELLED)
+    InventoryService -> InventoryRepository: restoreProductStock(productId, qty)
+else No Reservation
+    note right: Nothing to restore
+end
+
+InventoryService -> KafkaProducer: StockUpdateEvent
+
+== 5. Admin/Vendor Stock Operations ==
+
+User -> SecurityFilter: HTTP Request (Admin stock ops)
+SecurityFilter -> Controller: Valid request
+Controller -> InventoryService: get/update stock
+
+InventoryService -> InventoryRepository: getStock(productId)
+InventoryRepository --> InventoryService: stock
+
+InventoryService -> InventoryRepository: updateStock(productId, newQty)
+
+InventoryService -> StockAlertRuleEngine: evaluateStockRules(productId)
+StockAlertRuleEngine --> InventoryService: rule evaluation result
+
+InventoryService -> KafkaProducer: StockUpdateEvent
+
+alt Low stock
+    InventoryService -> KafkaProducer: LowStockEvent
+end
+
+alt Suspicious manual update
+    InventoryService -> KafkaProducer: SuspiciousStockUpdateEvent
+end
+
+@enduml

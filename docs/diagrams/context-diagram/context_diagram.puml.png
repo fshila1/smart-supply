@@ -1,0 +1,24 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+Person(customer, "Customer", "Browses products, places orders, makes payments.")
+Person(admin, "Admin", "Manages product stock, monitors analytics.")
+Person(vendor, "Vendor", "Updates stock & views dashboards.")
+
+System(ecom, "E-Commerce Platform", "Allows users to browse, order goods, and manage stock.")
+
+System_Ext(kafka, "Kafka Cluster", "Event streaming backbone.")
+System_Ext(paymentGateway, "Payment Gateway", "Processes online payments.")
+System_Ext(notificationPlatform, "Notification Providers", "Email/SMS/Push channels.")
+System_Ext(biSystem, "BI System", "Advanced reporting and dashboards.")
+
+Rel(customer, ecom, "Places orders, makes payments")
+Rel(admin, ecom, "Manages inventory & rules")
+Rel(vendor, ecom, "Updates inventory, views analytics")
+
+Rel(ecom, kafka, "Publishes and consumes domain events")
+Rel(ecom, paymentGateway, "Payment requests/responses")
+Rel(ecom, notificationPlatform, "Sends transactional notifications")
+Rel(ecom, biSystem, "Provides analytics data")
+
+@enduml

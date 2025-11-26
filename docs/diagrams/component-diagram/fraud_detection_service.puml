@@ -1,0 +1,17 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(fraud, "Fraud Detection Service", "Java")
+
+Component(cons, "KafkaConsumer")
+Component(ruleEngine, "FraudRuleEngine")
+Component(config, "FraudConfigService")
+Component(repo, "FraudLogRepository")
+Component(prod, "KafkaProducer")
+
+Rel(cons, ruleEngine, "Send event")
+Rel(ruleEngine, config, "Load fraud rules")
+Rel(ruleEngine, repo, "Store fraud logs")
+Rel(ruleEngine, prod, "Emit FraudDetected events")
+
+@enduml

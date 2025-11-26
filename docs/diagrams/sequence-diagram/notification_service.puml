@@ -1,0 +1,64 @@
+@startuml
+title Notification Service - Full Event Processing Flow
+
+actor "KafkaConsumer" as KC
+participant "NotificationService" as NS
+participant "NotificationConfigService" as NCS
+participant "NotificationRouter" as NR
+participant "EmailService" as ES
+participant "SmsService" as SS
+participant "PushNotificationService" as PS
+participant "NotificationResilienceManager" as NRM
+participant "RetryPolicyConfig" as RPC
+database "Redis Retry Queue" as RRQ
+queue "Kafka DLQ" as DLQ
+participant "NotificationFailureHandler" as NFH
+
+== Event Consumption ==
+KC -> NS: Event\n(PaymentSuccessEvent /\nOrderConfirmedEvent /\nLowStockEvent /\nFraudDetectedEvent)
+
+== Load Config ==
+NS -> NCS: Fetch config + templates
+NCS --> NS: Config + template
+
+== Determine Channel ==
+NS -> NR: Determine channel (Email/SMS/Push)
+NR --> NS: Selected channel
+
+== Send Notification ==
+alt Channel = Email
+    NS -> ES: Send Email
+    ES --> NS: Response
+else Channel = SMS
+    NS -> SS: Send SMS
+    SS --> NS: Response
+else Channel = Push
+    NS -> PS: Send Push Notification
+    PS --> NS: Response
+end
+
+== Success ==
+NS -> NS: Mark delivered
+
+== Failure ==
+NS -> NRM: Handle failure
+
+NRM -> RPC: Get retry policy
+RPC --> NRM: RetryPolicy
+
+alt Retryable Failure
+    NRM -> RRQ: Add to Retry Queue
+    RRQ --> NRM: ACK
+    NRM -> NFH: Trigger retry
+else Terminal Failure
+    NRM -> DLQ: Send to DLQ
+    DLQ --> NRM: ACK
+end
+
+== Retry Handler ==
+NFH -> RRQ: Pull retry item
+RRQ --> NFH: Notification data
+NFH -> NS: Reprocess notification
+NS --> NFH: Response
+
+@enduml

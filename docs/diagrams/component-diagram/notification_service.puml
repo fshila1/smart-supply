@@ -1,0 +1,18 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(notif, "Notification Service", "Java")
+
+Component(subscriber, "KafkaConsumer")
+Component(dispatcher, "NotificationDispatcher")
+Component(config, "NotificationConfigService")
+Component(platform, "NotificationChannelAdapter", "Email/SMS/Push")
+Component(retry, "NotificationResilienceManager")
+
+Rel(subscriber, dispatcher, "On event")
+Rel(dispatcher, config, "Load templates & API keys")
+Rel(dispatcher, platform, "Send notification")
+Rel(dispatcher, retry, "Store failed attempts")
+Rel(retry, platform, "Retry send")
+
+@enduml

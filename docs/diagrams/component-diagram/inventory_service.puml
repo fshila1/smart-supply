@@ -1,0 +1,19 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(inv, "Inventory Service", "Java Spring Boot")
+
+Component(stockController, "StockController")
+Component(stockService, "StockService", "Business logic for stock & reservations")
+Component(stockRepo, "InventoryRepository", "MySQL")
+Component(ruleEngine, "StockAlertRuleEngine", "Threshold & anomaly rules")
+Component(kafkaProd, "KafkaProducer")
+Component(kafkaCons, "KafkaConsumer")
+
+Rel(stockController, stockService, "Validates & delegates")
+Rel(stockService, stockRepo, "DB operations")
+Rel(stockService, ruleEngine, "Checks fraud & thresholds")
+Rel(stockService, kafkaProd, "Emits Stock events")
+Rel(kafkaCons, stockService, "Handles reservation events")
+
+@enduml

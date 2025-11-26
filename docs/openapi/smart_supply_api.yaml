@@ -1,0 +1,490 @@
+openapi: 3.0.3
+info:
+  title: Fintech E-Commerce Platform API
+  version: 1.0.0
+
+servers:
+  - url: https://api.example.com
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+
+  schemas:
+    LoginRequest:
+      type: object
+      properties:
+        username: { type: string }
+        password: { type: string }
+      required: [username, password]
+
+    LoginResponse:
+      type: object
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+        expiresIn: { type: integer }
+        roles:
+          type: array
+          items: { type: string }
+
+    RefreshRequest:
+      type: object
+      properties:
+        refreshToken: { type: string }
+      required: [refreshToken]
+
+    User:
+      type: object
+      properties:
+        id: { type: string }
+        username: { type: string }
+        email: { type: string }
+        roles:
+          type: array
+          items: { type: string }
+
+    CreateUserRequest:
+      type: object
+      properties:
+        username: { type: string }
+        password: { type: string }
+        email: { type: string }
+        roles:
+          type: array
+          items: { type: string }
+      required: [username, password]
+
+    OrderRequest:
+      type: object
+      properties:
+        buyerId: { type: string }
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              productId: { type: string }
+              quantity: { type: integer }
+        paymentMethod: { type: string }
+      required: [buyerId, items]
+
+    OrderResponse:
+      type: object
+      properties:
+        orderId: { type: string }
+        status: { type: string }
+
+    PaymentRequest:
+      type: object
+      properties:
+        paymentMethod: { type: string }
+      required: [paymentMethod]
+
+    InventoryReserveRequest:
+      type: object
+      properties:
+        productId: { type: string }
+        quantity: { type: integer }
+      required: [productId, quantity]
+
+    SupplierReorderRequest:
+      type: object
+      properties:
+        productId: { type: string }
+        quantity: { type: integer }
+      required: [productId, quantity]
+
+    NotificationSendRequest:
+      type: object
+      properties:
+        type: { type: string, example: "email" }
+        recipient: { type: string }
+        message: { type: string }
+      required: [type, recipient, message]
+
+security:
+  - bearerAuth: []
+
+paths:
+
+  #############################
+  # AUTH / USER SERVICE
+  #############################
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LoginResponse" }
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RefreshRequest" }
+      responses:
+        '200':
+          description: New tokens issued
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RefreshRequest" }
+      responses:
+        '200':
+          description: Logged out
+
+  /users/me:
+    get:
+      tags: [Users]
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+
+  /users/{id}:
+    get:
+      tags: [Users]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+    put:
+      tags: [Users]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateUserRequest" }
+      responses:
+        '200':
+          description: User updated
+
+  /users:
+    post:
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateUserRequest" }
+      responses:
+        '201':
+          description: User created
+
+  /roles:
+    get:
+      tags: [Users]
+      responses:
+        '200':
+          description: List roles
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: string }
+
+  #############################
+  # ORDER SERVICE
+  #############################
+
+  /orders:
+    post:
+      tags: [Orders]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OrderRequest" }
+      responses:
+        '201':
+          description: Order created
+    get:
+      tags: [Orders]
+      parameters:
+        - name: buyerId
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer }
+        - name: size
+          in: query
+          schema: { type: integer }
+      responses:
+        '200':
+          description: List orders
+
+  /orders/{orderId}:
+    get:
+      tags: [Orders]
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Order details
+
+  /orders/{orderId}/cancel:
+    post:
+      tags: [Orders]
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Order cancelled
+
+  /orders/{orderId}/pay:
+    post:
+      tags: [Orders]
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+        - name: orderId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PaymentRequest" }
+      responses:
+        '200':
+          description: Payment triggered
+
+  /orders/{orderId}/events:
+    get:
+      tags: [Orders]
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Audit event list
+
+  #############################
+  # INVENTORY SERVICE
+  #############################
+
+  /inventory/product/{productId}:
+    get:
+      tags: [Inventory]
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Product inventory
+
+  /inventory/warehouse/{warehouseId}/product/{productId}:
+    get:
+      tags: [Inventory]
+      parameters:
+        - name: warehouseId
+          in: path
+          description: ID of the warehouse
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: productId
+          in: path
+          description: ID of the product from a warehouse
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Warehouse inventory
+
+  /inventory/reserve:
+    post:
+      tags: [Inventory]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InventoryReserveRequest" }
+      responses:
+        '200':
+          description: Reserve response
+
+  /inventory/release:
+    post:
+      tags: [Inventory]
+      responses:
+        '200':
+          description: Released reservation
+
+  /inventory/adjust:
+    post:
+      tags: [Inventory]
+      responses:
+        '200':
+          description: Adjusted
+
+  /inventory/low-stock:
+    get:
+      tags: [Inventory]
+      parameters:
+        - name: threshold
+          in: query
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Low stock list
+
+  /inventory/reconcile:
+    post:
+      tags: [Inventory]
+      responses:
+        '200':
+          description: Reconciliation done
+
+  #############################
+  # SUPPLIER SERVICE
+  #############################
+
+  /supplier/reorder:
+    post:
+      tags: [Supplier]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SupplierReorderRequest" }
+      responses:
+        '202':
+          description: Reorder job accepted
+
+  #############################
+  # NOTIFICATION SERVICE
+  #############################
+
+  /notifications/send:
+    post:
+      tags: [Notifications]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NotificationSendRequest" }
+      responses:
+        '200':
+          description: Notification queued
+
+  #############################
+  # ANALYTICS SERVICE
+  #############################
+
+  /analytics/sales:
+    get:
+      tags: [Analytics]
+      parameters:
+        - name: start
+          in: query
+          schema: { type: string, format: date }
+        - name: end
+          in: query
+          schema: { type: string, format: date }
+        - name: groupBy
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Sales metrics
+
+  /analytics/inventory/turnover:
+    get:
+      tags: [Analytics]
+      parameters:
+        - name: productId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Inventory turnover metrics
+
+  #############################
+  # ADMIN
+  #############################
+
+  /admin/health:
+    get:
+      tags: [Admin]
+      responses:
+        '200':
+          description: Health check
+
+  /admin/audit:
+    get:
+      tags: [Admin]
+      responses:
+        '200':
+          description: Audit logs
+
+  /admin/fix-inventory:
+    post:
+      tags: [Admin]
+      responses:
+        '200':
+          description: Fix completed

@@ -1,0 +1,44 @@
+@startuml
+title Login Flow (Without MFA) with Suspicious Login Detection
+
+actor Client as CLIENT
+participant "Security Filter" as FILTER
+participant "AuthenticationController" as AUTH_CONTROLLER
+participant "AuthenticationService" as AUTH_SERVICE
+participant "SuspiciousLoginDetector" as SUSPICIOUS
+participant "KafkaProducer / EventPublisher" as PRODUCER
+participant "KafkaConsumer / EventListener" as CONSUMER
+participant "Notification Service" as NOTIF
+participant "Analytics Service" as ANALYTICS
+participant "Fraud Detection Service" as FRAUD
+
+== User Initiates Login ==
+CLIENT -> FILTER: login(username, password)
+FILTER -> AUTH_CONTROLLER: check request
+
+== Authentication Process ==
+AUTH_CONTROLLER -> AUTH_SERVICE: login user\n(username, password)
+AUTH_SERVICE -> AUTH_SERVICE: validate credentials\ncheck account status
+
+== Login Metadata Published ==
+AUTH_SERVICE -> PRODUCER: LoginMetadataEvent
+
+== Suspicious Login Check ==
+PRODUCER -> SUSPICIOUS: deliver login metadata
+SUSPICIOUS -> SUSPICIOUS: evaluate risk signals
+
+alt Suspicious Login
+    SUSPICIOUS -> PRODUCER: User.SuspiciousLoginEvent
+    PRODUCER -> FRAUD: SuspiciousLoginEvent
+    FRAUD -> NOTIF: Send alert to Admin
+else Normal Login
+    SUSPICIOUS -> PRODUCER: User.LoginSuccessEvent
+    PRODUCER -> ANALYTICS: User.LoginSuccessEvent
+end
+
+== Return Response ==
+AUTH_SERVICE -> AUTH_CONTROLLER: login result
+AUTH_CONTROLLER -> FILTER: auth response
+FILTER -> CLIENT: authentication result
+
+@enduml

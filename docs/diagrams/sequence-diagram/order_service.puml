@@ -1,0 +1,69 @@
+@startuml
+autonumber
+
+actor User
+participant "API Gateway / Security Filter" as Filter
+participant Controller
+participant OrderService
+participant InventoryService
+participant OrderRepository
+participant KafkaProducer
+participant KafkaConsumer
+participant PaymentService
+participant NotificationService
+participant AnalyticsService
+
+== User places order ==
+
+User -> Filter: HTTP Request: Create Order
+Filter -> User: Reject if invalid\n(rate limit, ip, token, role)
+Filter -> Controller: Forward if valid
+
+Controller -> OrderService: createOrder(requestPayload)
+
+OrderService -> OrderService: validate payload
+
+OrderService -> InventoryService: checkStockSync(orderItems)
+InventoryService --> OrderService: stockAvailable / notAvailable
+
+OrderService -> OrderRepository: save(order=PENDING)
+
+OrderService -> KafkaProducer: emit StockReservationRequestedEvent
+
+== Async: Inventory handles stock reservation ==
+
+KafkaConsumer -> OrderService: StockReservedEvent
+OrderService -> OrderRepository: update status = STOCK_RESERVED
+
+OrderService -> KafkaProducer: emit PaymentInitiationRequested\n(with paymentInfo)
+...Or...
+KafkaConsumer -> OrderService: StockReservationFailedEvent
+OrderService -> OrderRepository: update status = CANCELLED\n(reason=stock_failure)
+OrderService -> KafkaProducer: emit OrderCancelledEvent
+NotificationService <- KafkaProducer: notify cancellation
+AnalyticsService <- KafkaProducer: record cancellation
+
+== Reservation timeout ==
+
+OrderService -> OrderService: wait for payment info (TTL)
+OrderService -> OrderRepository: update status = CANCELLED\n(reason=reservation_expired)
+OrderService -> KafkaProducer: emit StockReservationExpiredEvent
+OrderService -> KafkaProducer: emit OrderCancelledEvent
+NotificationService <- KafkaProducer: notify cancellation
+AnalyticsService <- KafkaProducer: record cancellation
+
+== Payment Flow ==
+
+KafkaConsumer -> OrderService: PaymentSuccessEvent
+OrderService -> OrderRepository: update status=CONFIRMED
+OrderService -> KafkaProducer: emit OrderConfirmedEvent
+NotificationService <- KafkaProducer: notify confirmation
+AnalyticsService <- KafkaProducer: record confirmation
+
+KafkaConsumer -> OrderService: PaymentFailureEvent
+OrderService -> OrderRepository: update status=CANCELLED\n(reason=payment_failure)
+OrderService -> KafkaProducer: emit OrderCancelledEvent
+NotificationService <- KafkaProducer: notify cancellation
+AnalyticsService <- KafkaProducer: record cancellation
+
+@enduml
