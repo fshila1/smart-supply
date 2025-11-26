@@ -1,0 +1,3 @@
+SmartSupply — Supply Chain & Order Orchestration Platform
+SmartSupply is a modular, event-driven microservices system designed for B2B order management, real-time inventory control, supplier integration (SOAP + REST), analytics, and secure identity management.
+Built using Java (Spring Boot), Angular, Kafka, PostgreSQL, Docker, and Kubernetes, the platform demonstrates senior-level full-stack and backend architecture capabilities.
