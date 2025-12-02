@@ -1,1 +1,11 @@
 fs/project/Main.class
+fs/project/service/JwtService.class
+fs/project/DTO/LoginRequest.class
+fs/project/repository/UserRepository.class
+fs/project/config/SecurityConfig.class
+fs/project/DTO/AuthResponse.class
+fs/project/DTO/RegisterRequest.class
+fs/project/controller/AuthController$ErrorResponse.class
+fs/project/service/AuthService.class
+fs/project/entity/User.class
+fs/project/controller/AuthController.class
