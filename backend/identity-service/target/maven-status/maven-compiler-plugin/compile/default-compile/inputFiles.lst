@@ -1,5 +1,6 @@
 /Users/farhana/Documents/projects/smart-supply/backend/identity-service/src/main/java/fs/project/DTO/AuthResponse.java
 /Users/farhana/Documents/projects/smart-supply/backend/identity-service/src/main/java/fs/project/DTO/RegisterRequest.java
+/Users/farhana/Documents/projects/smart-supply/backend/identity-service/src/main/java/fs/project/config/WebConfig.java
 /Users/farhana/Documents/projects/smart-supply/backend/identity-service/src/main/java/fs/project/config/SecurityConfig.java
 /Users/farhana/Documents/projects/smart-supply/backend/identity-service/src/main/java/fs/project/Main.java
 /Users/farhana/Documents/projects/smart-supply/backend/identity-service/src/main/java/fs/project/controller/AuthController.java
