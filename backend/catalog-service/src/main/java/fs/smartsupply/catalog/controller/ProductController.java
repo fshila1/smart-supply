@@ -7,6 +7,7 @@ import fs.smartsupply.catalog.DTO.ProductResponse;
 import fs.smartsupply.catalog.service.ProductService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/products")
@@ -24,7 +25,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ProductResponse getById(@PathVariable Long id) {
+    public ProductResponse getById(@PathVariable UUID id) {
         return service.getById(id);
     }
 
@@ -34,12 +35,12 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ProductResponse update(@PathVariable Long id, @RequestBody ProductRequest req) {
+    public ProductResponse update(@PathVariable UUID id, @RequestBody ProductRequest req) {
         return service.update(id, req);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable UUID id) {
         service.delete(id);
     }
 }

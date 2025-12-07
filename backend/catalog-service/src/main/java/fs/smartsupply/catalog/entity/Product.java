@@ -1,58 +1,79 @@
 package fs.smartsupply.catalog.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Entity
-@Table(name = "products")
+@Table(
+    name = "products",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = "sku")
+    }
+)
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "UUID")
+    private UUID id;
 
+    @Column(name = "sku", length = 100, nullable = false, unique = true)
+    private String sku;
+
+    @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "description")
     private String description;
-    private double price;
-    private int stock;
 
-    // getters and setters
-    public Long getId() {
-        return id;
+    @Column(
+        name = "unit_price",
+        nullable = false,
+        precision = 12,
+        scale = 2
+    )
+    private BigDecimal unitPrice;
+
+    @Column(
+        name = "weight_kg",
+        precision = 8,
+        scale = 3
+    )
+    private BigDecimal weightKg;
+
+    @Column(
+        name = "created_at",
+        nullable = false,
+        columnDefinition = "TIMESTAMPTZ"
+    )
+    private OffsetDateTime createdAt;
+
+    @Column(
+        name = "updated_at",
+        nullable = false,
+        columnDefinition = "TIMESTAMPTZ"
+    )
+    private OffsetDateTime updatedAt;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = OffsetDateTime.now();
+        this.updatedAt = OffsetDateTime.now();
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
-    public int getStock() {
-        return stock;
-    }
-
-    public void setStock(int stock) {
-        this.stock = stock;
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = OffsetDateTime.now();
     }
 }

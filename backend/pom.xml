@@ -20,19 +20,15 @@
     </properties>
 
     <modules>
-        <module>analytics-service</module>
         <module>identity-service</module>
-        <module>inventory-service</module>
-        <module>notification-service</module>
         <module>order-service</module>
-        <module>payment-service</module>
-        <module>supplier-service</module>
         <module>catalog-service</module>
         <module>analytics-service</module>
         <module>inventory-service</module>
         <module>notification-service</module>
         <module>payment-service</module>
         <module>supplier-service</module>
+        <module>common</module>
     </modules>
 
     <dependencyManagement>

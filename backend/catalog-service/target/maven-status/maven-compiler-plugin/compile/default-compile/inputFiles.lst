@@ -1,8 +1,8 @@
-/Users/farhana/Documents/projects/smart-supply/backend/catalog-service/src/main/java/fs/project/mapper/ProductMapper.java
-/Users/farhana/Documents/projects/smart-supply/backend/catalog-service/src/main/java/fs/project/service/ProductService.java
-/Users/farhana/Documents/projects/smart-supply/backend/catalog-service/src/main/java/fs/project/controller/ProductController.java
-/Users/farhana/Documents/projects/smart-supply/backend/catalog-service/src/main/java/fs/project/repository/ProductRepository.java
-/Users/farhana/Documents/projects/smart-supply/backend/catalog-service/src/main/java/fs/project/DTO/ProductResponse.java
-/Users/farhana/Documents/projects/smart-supply/backend/catalog-service/src/main/java/fs/project/entity/Product.java
-/Users/farhana/Documents/projects/smart-supply/backend/catalog-service/src/main/java/fs/project/DTO/ProductRequest.java
-/Users/farhana/Documents/projects/smart-supply/backend/catalog-service/src/main/java/fs/project/Main.java
+/Users/farhana/Documents/projects/smart-supply/backend/catalog-service/src/main/java/fs/smartsupply/catalog/entity/Product.java
+/Users/farhana/Documents/projects/smart-supply/backend/catalog-service/src/main/java/fs/smartsupply/catalog/controller/ProductController.java
+/Users/farhana/Documents/projects/smart-supply/backend/catalog-service/src/main/java/fs/smartsupply/catalog/DTO/ProductRequest.java
+/Users/farhana/Documents/projects/smart-supply/backend/catalog-service/src/main/java/fs/smartsupply/catalog/Main.java
+/Users/farhana/Documents/projects/smart-supply/backend/catalog-service/src/main/java/fs/smartsupply/catalog/service/ProductService.java
+/Users/farhana/Documents/projects/smart-supply/backend/catalog-service/src/main/java/fs/smartsupply/catalog/repository/ProductRepository.java
+/Users/farhana/Documents/projects/smart-supply/backend/catalog-service/src/main/java/fs/smartsupply/catalog/DTO/ProductResponse.java
+/Users/farhana/Documents/projects/smart-supply/backend/catalog-service/src/main/java/fs/smartsupply/catalog/mapper/ProductMapper.java

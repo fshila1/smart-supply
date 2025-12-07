@@ -9,6 +9,7 @@ import fs.smartsupply.catalog.mapper.ProductMapper;
 import fs.smartsupply.catalog.repository.ProductRepository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ProductService {
@@ -27,21 +28,35 @@ public class ProductService {
                 .toList();
     }
 
-    public ProductResponse getById(Long id) {
+    public ProductResponse getById(UUID id) {
         return repo.findById(id)
                 .map(mapper::toResponse)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
     public ProductResponse create(ProductRequest req) {
+        req.setSku(generateSku(req.getName()));
         Product product = mapper.toEntity(req);
         repo.save(product);
         return mapper.toResponse(product);
     }
 
-    public ProductResponse update(Long id, ProductRequest req) {
+    private String generateSku(String name) {
+        // Example SKU pattern: ABC-20241205-8392
+        String prefix = name == null ? "PRD" :
+                name.replaceAll("[^A-Za-z0-9]", "")
+                    .toUpperCase()
+                    .substring(0, Math.min(3, name.length()));
+
+        String random = String.valueOf((int) (Math.random() * 9000 + 1000));
+
+        return prefix + "-" + System.currentTimeMillis() + "-" + random;
+    }
+
+    public ProductResponse update(UUID id, ProductRequest req) {
         Product product = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
+        if(product != null) req.setSku(product.getSku());
 
         mapper.updateEntity(req, product);
         repo.save(product);
@@ -49,7 +64,7 @@ public class ProductService {
         return mapper.toResponse(product);
     }
 
-    public void delete(Long id) {
+    public void delete(UUID id) {
         repo.deleteById(id);
     }
 }

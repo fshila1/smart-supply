@@ -11,27 +11,32 @@ public class ProductMapper {
 
     public Product toEntity(ProductRequest req) {
         Product p = new Product();
-        p.setName(req.name());
-        p.setDescription(req.description());
-        p.setPrice(req.price());
-        p.setStock(req.stock());
+        p.setName(req.getName());
+        p.setDescription(req.getDescription());
+        p.setUnitPrice(req.getUnitPrice());
+        p.setWeightKg(req.getWeightKg());
+        p.setSku(req.getSku());
         return p;
     }
 
     public void updateEntity(ProductRequest req, Product product) {
-        product.setName(req.name());
-        product.setDescription(req.description());
-        product.setPrice(req.price());
-        product.setStock(req.stock());
+        product.setName(req.getName());
+        product.setDescription(req.getDescription());
+        product.setUnitPrice(req.getUnitPrice());
+        product.setWeightKg(req.getWeightKg());
+        product.setSku(req.getSku());
     }
 
     public ProductResponse toResponse(Product p) {
         return new ProductResponse(
             p.getId(),
+            p.getSku(),
             p.getName(),
             p.getDescription(),
-            p.getPrice(),
-            p.getStock()
+            p.getUnitPrice(),
+            p.getWeightKg(),
+            p.getCreatedAt(),
+            p.getUpdatedAt()
         );
     }
 }

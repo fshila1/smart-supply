@@ -1,0 +1,8 @@
+fs/smartsupply/catalog/Main.class
+fs/smartsupply/catalog/service/ProductService.class
+fs/smartsupply/catalog/mapper/ProductMapper.class
+fs/smartsupply/catalog/DTO/ProductResponse.class
+fs/smartsupply/catalog/controller/ProductController.class
+fs/smartsupply/catalog/entity/Product.class
+fs/smartsupply/catalog/repository/ProductRepository.class
+fs/smartsupply/catalog/DTO/ProductRequest.class
