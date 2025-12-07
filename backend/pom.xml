@@ -10,7 +10,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>fs.project</groupId>
+    <groupId>fs.smartsupply</groupId>
     <artifactId>smart-supply</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -28,6 +28,11 @@
         <module>payment-service</module>
         <module>supplier-service</module>
         <module>catalog-service</module>
+        <module>analytics-service</module>
+        <module>inventory-service</module>
+        <module>notification-service</module>
+        <module>payment-service</module>
+        <module>supplier-service</module>
     </modules>
 
     <dependencyManagement>
