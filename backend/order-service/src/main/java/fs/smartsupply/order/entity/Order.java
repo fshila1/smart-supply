@@ -1,51 +1,63 @@
 package fs.smartsupply.order.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import lombok.*;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
+import fs.smartsupply.order.DTO.OrderStatus;   // <-- FIXED PACKAGE
 
 @Entity
 @Table(name = "orders")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Order {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "order_id", nullable = false, updatable = false)
+    private Long orderId;
 
-    private Long productId;
-    private int quantity;
-    private String status; // NEW, PROCESSING, COMPLETED
+    @Column(name = "user_id", nullable = false, columnDefinition = "UUID")
+    private UUID userId;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    // getters and setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getProductId() {
-        return productId;
-    }
-
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
+    // @Enumerated(EnumType.STRING)          // <-- REQUIRED
+    @Column(name = "status", nullable = false, length = 50)
+    private OrderStatus status;
     
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
+
+    @Column(name = "total_amount", precision = 12, scale = 2, nullable = false)
+    private BigDecimal totalAmount;
+
+    @Column(name = "currency", length = 10, nullable = false)
+    private String currency;
+
+    @Column(name = "correlation_id", columnDefinition = "UUID")
+    private UUID correlationId;
+
+    @Column(name = "created_at", columnDefinition = "TIMESTAMPTZ", nullable = false)
+    private OffsetDateTime createdAt;
+
+    @Column(name = "updated_at", columnDefinition = "TIMESTAMPTZ", nullable = false)
+    private OffsetDateTime updatedAt;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = OffsetDateTime.now();
+        this.updatedAt = OffsetDateTime.now();
+
+        if (correlationId == null) {
+            this.correlationId = UUID.randomUUID();
+        }
     }
 
-    public String getStatus() {
-        return status;
-    }
-    
-    public void setStatus(String status) {
-        this.status = status;
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = OffsetDateTime.now();
     }
 }

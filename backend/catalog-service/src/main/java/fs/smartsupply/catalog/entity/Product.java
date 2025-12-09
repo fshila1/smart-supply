@@ -2,7 +2,6 @@ package fs.smartsupply.catalog.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -23,8 +22,7 @@ import java.util.UUID;
 public class Product {
 
     @Id
-    @GeneratedValue
-    @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "UUID")
     private UUID id;
 

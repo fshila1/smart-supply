@@ -1,7 +1,10 @@
 package fs.smartsupply.identity.DTO;
 
+import java.util.UUID;
+
 public class AuthResponse {
     
+    private UUID userId;
     private String token;
     private String tokenType = "Bearer";
     private String username;
@@ -10,10 +13,19 @@ public class AuthResponse {
     public AuthResponse() {
     }
     
-    public AuthResponse(String token, String username, String email) {
+    public AuthResponse(UUID id, String token, String username, String email) {
+        this.userId = id;
         this.token = token;
         this.username = username;
         this.email = email;
+    }
+
+    public UUID getUserId() {
+        return userId;
+    }
+    
+    public void setUserId(UUID id) {
+        this.userId = id;
     }
     
     public String getToken() {

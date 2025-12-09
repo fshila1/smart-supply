@@ -1,46 +1,48 @@
 package fs.smartsupply.order.controller;
 
+import fs.smartsupply.order.DTO.OrderRequest;
+import fs.smartsupply.order.DTO.OrderResponse;
+import fs.smartsupply.order.DTO.OrderStatus;
+import fs.smartsupply.order.service.OrderService;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import fs.smartsupply.order.entity.Order;
-import fs.smartsupply.order.service.OrderService;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
+@RequiredArgsConstructor
 public class OrderController {
-    private final OrderService service;
 
-    public OrderController(OrderService service) {
-        this.service = service;
+    private final OrderService orderService;
+    
+
+    @PostMapping
+    public ResponseEntity<OrderResponse> createOrder(@RequestBody OrderRequest dto) {
+        return ResponseEntity.ok(orderService.createOrder(dto));
+    }
+
+    @GetMapping("/{orderId}")
+    public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long orderId) {
+        OrderResponse response = orderService.getOrderById(orderId);
+        if (response == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public List<Order> getAll() {
-        return service.findAll();
+    public ResponseEntity<List<OrderResponse>> getAllOrders() {
+        return ResponseEntity.ok(orderService.getAllOrders());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Order> getById(@PathVariable Long id) {
-        return service.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PostMapping
-    public Order create(@RequestBody Order order) {
-        return service.create(order);
-    }
-
-    @PutMapping("/{id}")
-    public Order update(@PathVariable Long id, @RequestBody Order order) {
-        return service.update(id, order);
-    }
-
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        service.delete(id);
+    @PatchMapping("/{orderId}/status")
+    public ResponseEntity<OrderResponse> updateOrderStatus(
+            @PathVariable Long orderId,
+            @RequestParam OrderStatus status
+    ) {
+        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, status));
     }
 }
