@@ -1,9 +1,0 @@
-/Users/farhana/Documents/projects/smart-supply/backend/identity-service/src/main/java/fs/smartsupply/identity/service/JwtService.java
-/Users/farhana/Documents/projects/smart-supply/backend/identity-service/src/main/java/fs/smartsupply/identity/DTO/AuthResponse.java
-/Users/farhana/Documents/projects/smart-supply/backend/identity-service/src/main/java/fs/smartsupply/identity/controller/AuthController.java
-/Users/farhana/Documents/projects/smart-supply/backend/identity-service/src/main/java/fs/smartsupply/identity/DTO/RegisterRequest.java
-/Users/farhana/Documents/projects/smart-supply/backend/identity-service/src/main/java/fs/smartsupply/identity/DTO/LoginRequest.java
-/Users/farhana/Documents/projects/smart-supply/backend/identity-service/src/main/java/fs/smartsupply/identity/entity/User.java
-/Users/farhana/Documents/projects/smart-supply/backend/identity-service/src/main/java/fs/smartsupply/identity/service/AuthService.java
-/Users/farhana/Documents/projects/smart-supply/backend/identity-service/src/main/java/fs/smartsupply/identity/Main.java
-/Users/farhana/Documents/projects/smart-supply/backend/identity-service/src/main/java/fs/smartsupply/identity/repository/UserRepository.java

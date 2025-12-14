@@ -1,9 +1,11 @@
 package fs.smartsupply.order.service;
 
+import fs.smartsupply.common.events.OrderCreatedEvent;
 import fs.smartsupply.order.DTO.OrderRequest;
 import fs.smartsupply.order.DTO.OrderResponse;
 import fs.smartsupply.order.DTO.OrderStatus;
 import fs.smartsupply.order.entity.Order;
+import fs.smartsupply.order.publisher.OrderEventPublisher;
 import fs.smartsupply.order.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -16,24 +18,34 @@ import java.util.List;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final OrderEventPublisher orderEventPublisher;
 
     public OrderResponse createOrder(OrderRequest dto) {
-        System.out.println(dto.getStatus());
-        try {
-            Order order = Order.builder()
-                .userId(dto.getUserId())
-                .status(dto.getStatus())
-                .totalAmount(dto.getTotalAmount())
-                .currency(dto.getCurrency())
-                .build();
+        Order order = Order.builder()
+            .userId(dto.getUserId())
+            // .status(dto.getStatus())
+            .status(OrderStatus.PENDING)
+            .totalAmount(dto.getTotalAmount())
+            .currency(dto.getCurrency())
+            .build();
 
         order = orderRepository.save(order);
+
+        // PUBLISH EVENT
+        orderEventPublisher.publishOrderCreated(
+            new OrderCreatedEvent(
+                order.getOrderId(),
+                order.getUserId(),
+                dto.getItems(),
+                order.getTotalAmount(),
+                order.getCurrency()
+            )
+        );
+
+        // REQUEST STOCK RESERVATION
+        orderEventPublisher.publishStockReservationRequested(order.getOrderId());
+
         return toResponseDTO(order);
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-            return null;
-        }
-        
     }
 
     public OrderResponse getOrderById(Long orderId) {

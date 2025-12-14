@@ -1,7 +1,0 @@
-fs/smartsupply/inventory/publisher/InventoryEventPublisher.class
-fs/smartsupply/inventory/entity/ProductStock.class
-fs/smartsupply/inventory/repository/InventoryRepository.class
-fs/smartsupply/inventory/entity/ProductStock$ProductStockBuilder.class
-fs/smartsupply/inventory/listener/InventoryEventListener.class
-fs/smartsupply/inventory/service/InventoryWorkflowService.class
-fs/smartsupply/inventory/Main.class

@@ -1,0 +1,2 @@
+infrastructure/docker/kafka-data
+backend/**/target

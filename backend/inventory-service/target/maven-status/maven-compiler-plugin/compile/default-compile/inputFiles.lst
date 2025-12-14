@@ -1,6 +1,0 @@
-/Users/farhana/Documents/projects/smart-supply/backend/inventory-service/src/main/java/fs/smartsupply/inventory/Main.java
-/Users/farhana/Documents/projects/smart-supply/backend/inventory-service/src/main/java/fs/smartsupply/inventory/entity/ProductStock.java
-/Users/farhana/Documents/projects/smart-supply/backend/inventory-service/src/main/java/fs/smartsupply/inventory/repository/InventoryRepository.java
-/Users/farhana/Documents/projects/smart-supply/backend/inventory-service/src/main/java/fs/smartsupply/inventory/publisher/InventoryEventPublisher.java
-/Users/farhana/Documents/projects/smart-supply/backend/inventory-service/src/main/java/fs/smartsupply/inventory/listener/InventoryEventListener.java
-/Users/farhana/Documents/projects/smart-supply/backend/inventory-service/src/main/java/fs/smartsupply/inventory/service/InventoryWorkflowService.java
