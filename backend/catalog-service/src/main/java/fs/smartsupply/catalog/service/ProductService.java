@@ -1,5 +1,8 @@
 package fs.smartsupply.catalog.service;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import fs.smartsupply.catalog.DTO.ProductRequest;
@@ -22,16 +25,20 @@ public class ProductService {
         this.mapper = mapper;
     }
 
+    @Cacheable(value = "products", key = "'all'")
     public List<ProductResponse> getAll() {
         return repo.findAll().stream()
                 .map(mapper::toResponse)
                 .toList();
     }
 
+    @Cacheable(value = "products", key = "#id")
     public ProductResponse getById(UUID id) {
+        System.out.println("ss "+repo.findById(id).isEmpty());
         return repo.findById(id)
                 .map(mapper::toResponse)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                // .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElse(null);
     }
 
     public ProductResponse create(ProductRequest req) {
@@ -53,6 +60,10 @@ public class ProductService {
         return prefix + "-" + System.currentTimeMillis() + "-" + random;
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = "products", key = "#id"),
+        @CacheEvict(value = "products", key = "'all'")
+    })
     public ProductResponse update(UUID id, ProductRequest req) {
         Product product = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
@@ -64,6 +75,10 @@ public class ProductService {
         return mapper.toResponse(product);
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = "products", key = "#id"),
+        @CacheEvict(value = "products", key = "'all'")
+    })
     public void delete(UUID id) {
         repo.deleteById(id);
     }

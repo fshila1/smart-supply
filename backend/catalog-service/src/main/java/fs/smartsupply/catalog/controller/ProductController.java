@@ -1,5 +1,6 @@
 package fs.smartsupply.catalog.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import fs.smartsupply.catalog.DTO.ProductRequest;
@@ -25,8 +26,12 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ProductResponse getById(@PathVariable UUID id) {
-        return service.getById(id);
+    public ResponseEntity<ProductResponse> getById(@PathVariable UUID id) {
+        ProductResponse response = service.getById(id);
+        if (response == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
