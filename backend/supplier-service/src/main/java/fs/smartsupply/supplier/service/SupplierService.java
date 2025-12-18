@@ -2,7 +2,7 @@ package fs.smartsupply.supplier.service;
 
 import org.springframework.stereotype.Service;
 
-import com.smartsupply.supplier.soap.GetSupplierResponse;
+import com.smartsupply.supplier.soap.gen.GetSupplierResponse;
 
 import fs.smartsupply.supplier.DTO.SupplierResponseDTO;
 import fs.smartsupply.supplier.client.SupplierSoapClient;

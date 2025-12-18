@@ -55,19 +55,30 @@
             <artifactId>resilience4j-spring-boot3</artifactId>
         </dependency>
         <!-- JAXB API (javax) -->
-        <dependency>
+        <!-- <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
             <version>2.3.1</version>
-        </dependency>
+        </dependency> -->
 
         <!-- JAXB Runtime -->
-        <dependency>
+        <!-- <dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
             <version>2.3.3</version>
+        </dependency> -->
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+            <version>4.0.0</version>
         </dependency>
 
+        <!-- JAXB runtime compatible with Spring Boot 3 -->
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>4.0.4</version>
+        </dependency>
         <dependency>
             <groupId>javax.jws</groupId>
             <artifactId>javax.jws-api</artifactId>
@@ -83,6 +94,10 @@
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>rt</artifactId>
             <version>2.3.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.ws</groupId>
+            <artifactId>spring-ws-security</artifactId>
         </dependency>
     </dependencies>
 
@@ -101,7 +116,7 @@
                             <wsdlUrls>
                                 <wsdlUrl>src/main/resources/wsdl/supplier.wsdl</wsdlUrl>
                             </wsdlUrls>
-                            <packageName>com.smartsupply.supplier.soap</packageName>
+                            <packageName>com.smartsupply.supplier.soap.gen</packageName>
                         </configuration>
                     </execution>
                 </executions>

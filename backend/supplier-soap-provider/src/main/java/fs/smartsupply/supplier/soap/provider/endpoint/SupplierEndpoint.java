@@ -8,6 +8,7 @@ import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
 import com.smartsupply.supplier.soap.gen.GetSupplierRequest;
 import com.smartsupply.supplier.soap.gen.GetSupplierResponse;
 
+
 @Endpoint
 public class SupplierEndpoint {
 

@@ -1,6 +1,6 @@
 package fs.smartsupply.supplier.mapper;
 
-import com.smartsupply.supplier.soap.GetSupplierResponse;
+import com.smartsupply.supplier.soap.gen.GetSupplierResponse;
 
 import fs.smartsupply.supplier.DTO.SupplierResponseDTO;
 
