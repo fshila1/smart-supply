@@ -37,8 +37,7 @@ public class SoapClientConfig {
 
     // --- WebServiceTemplate with marshaller + WS-Security ---
     @Bean
-    public WebServiceTemplate webServiceTemplate(Jaxb2Marshaller marshaller,
-                                                 Wss4jSecurityInterceptor securityInterceptor) {
+    public WebServiceTemplate webServiceTemplate(Jaxb2Marshaller marshaller, Wss4jSecurityInterceptor securityInterceptor) {
         WebServiceTemplate template = new WebServiceTemplate();
 
         template.setMarshaller(marshaller);

@@ -21,17 +21,4 @@ public class WsSecurityConfig {
 
         return interceptor;
     }
-
-    // @Bean
-    // public SimpleUsernamePasswordValidationCallbackHandler usernamePasswordCallbackHandler() {
-    //     SimpleUsernamePasswordValidationCallbackHandler handler =
-    //             new SimpleUsernamePasswordValidationCallbackHandler();
-
-    //     handler.setUsersMap(
-    //             Map.of(
-    //                 "supplier-user", "secret"
-    //             )
-    //     );
-    //     return handler;
-    // }
 }
