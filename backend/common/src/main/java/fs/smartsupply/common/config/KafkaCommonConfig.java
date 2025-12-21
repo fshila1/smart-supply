@@ -1,6 +1,8 @@
 package fs.smartsupply.common.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import fs.smartsupply.common.model.NotificationEvent;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -43,12 +45,31 @@ public class KafkaCommonConfig {
     }
 
     @Bean
+    public ProducerFactory<String, NotificationEvent> producerNotificationFactory() {
+
+        Map<String, Object> props = new HashMap<>();
+
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        // props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        // props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+
+        return new DefaultKafkaProducerFactory<>(props);
+    }
+
+    @Bean
     @ConditionalOnMissingBean
     public KafkaTemplate<String, Object> kafkaTemplate() {
         KafkaTemplate<String, Object> template = new KafkaTemplate<>(producerFactory());
         template.setObservationEnabled(true); // metrics/tracing support
         return template;
     }
+
+    // @Bean
+    // public KafkaTemplate<String, NotificationEvent> kafkaNotificationTemplate() {
+    //     KafkaTemplate<String, NotificationEvent> template = new KafkaTemplate<>(producerNotificationFactory());
+    //     template.setMessageConverter(new StringJsonMessageConverter());
+    //     return template;
+    // }
 
     // -------------------------------------------------------
     // COMMON CONSUMER CONFIGURATION
