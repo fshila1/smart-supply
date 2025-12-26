@@ -1,0 +1,60 @@
+<section class="supplier-container">
+
+    <h2>Supplier Integrations</h2>
+
+    <!-- Loading -->
+    <div *ngIf="loading$ | async" class="loading">
+        Loading suppliers...
+    </div>
+
+    <!-- Supplier List -->
+    <table *ngIf="(suppliers$ | async) as suppliers" class="supplier-table">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Last Sync</th>
+                <th>Sync Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr *ngFor="let supplier of suppliers; trackBy: trackBySupplierId">
+
+                <td>{{ supplier.code }}</td>
+                <td>{{ supplier.name }}</td>
+                <td>{{ supplier.status }}</td>
+                <td>
+                    {{ supplier.lastSyncAt
+                    ? (supplier.lastSyncAt | date: 'short')
+                    : '—' }}
+                </td>
+                <td>
+                    <span class="status" [ngClass]="supplier.syncStatus">
+                        {{ supplier.syncStatus || 'NOT_SYNCED' }}
+                    </span>
+                </td>
+                <td>
+                    <button (click)="onSyncSupplier(supplier.id)" [disabled]="
+                (syncingSupplierId$ | async) === supplier.id
+              ">
+                        {{
+                        (syncingSupplierId$ | async) === supplier.id
+                        ? 'Syncing...'
+                        : 'Sync'
+                        }}
+                    </button>
+                </td>
+
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Empty State -->
+    <div *ngIf="(suppliers$ | async)?.length === 0">
+        No suppliers found.
+    </div>
+
+</section>

@@ -1,0 +1,26 @@
+.supplier-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.supplier-table th,
+.supplier-table td {
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+}
+
+.status.SUCCESS {
+    color: green;
+}
+
+.status.FAILED {
+    color: red;
+}
+
+.status.IN_PROGRESS {
+    color: orange;
+}
+
+.loading {
+    font-style: italic;
+}

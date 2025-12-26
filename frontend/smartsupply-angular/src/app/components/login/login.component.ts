@@ -46,8 +46,8 @@ export class LoginComponent {
         next: (response) => {
           this.isLoading = false;
           // Redirect to dashboard or home page
-          this.router.navigate(['/product-list']);
-          console.log("yayyyyy")
+          // this.router.navigate(['/product-list']);
+          this.router.navigate(['/supplier-list']);
         },
         error: (error) => {
           this.isLoading = false;

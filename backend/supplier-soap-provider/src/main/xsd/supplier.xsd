@@ -1,27 +1,172 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            xmlns:tns="http://smartsupply.com/supplier"
-            targetNamespace="http://smartsupply.com/supplier"
-            elementFormDefault="qualified">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://supplier.com/schema"
+    xmlns:tns="http://supplier.com/schema"
+    elementFormDefault="qualified">
 
-    <!-- Request -->
-    <xsd:element name="GetSupplierRequest">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element name="supplierId" type="xsd:string"/>
-            </xsd:sequence>
-        </xsd:complexType>
-    </xsd:element>
+    <!-- COMMON TYPES -->
+    <xs:complexType name="SupplierProduct">
+        <xs:sequence>
+            <xs:element name="supplierProductRef" type="xs:string" />
+            <xs:element name="name" type="xs:string" />
+            <xs:element name="description" type="xs:string" minOccurs="0" />
+            <xs:element name="status" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType>
 
-    <!-- Response -->
-    <xsd:element name="GetSupplierResponse">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element name="id" type="xsd:string"/>
-                <xsd:element name="name" type="xsd:string"/>
-                <xsd:element name="status" type="xsd:string"/>
-            </xsd:sequence>
-        </xsd:complexType>
-    </xsd:element>
+    <xs:complexType name="Inventory">
+        <xs:sequence>
+            <xs:element name="supplierProductRef" type="xs:string" />
+            <xs:element name="stock" type="xs:int" />
+            <xs:element name="lowStockThreshold" type="xs:int" />
+            <xs:element name="lastUpdatedAt" type="xs:dateTime" />
+        </xs:sequence>
+    </xs:complexType>
 
-</xsd:schema>
+    <xs:complexType name="SupplierSummary">
+        <xs:sequence>
+            <xs:element name="totalProducts" type="xs:int" />
+            <xs:element name="lowStockCount" type="xs:int" />
+            <xs:element name="lastInventorySync" type="xs:dateTime" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- REQUEST & RESPONSE TYPES -->
+
+    <!-- <xs:element name="AddSupplierProductRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="supplierCode" type="xs:string" />
+                <xs:element name="name" type="xs:string" />
+                <xs:element name="description" type="xs:string" minOccurs="0" />
+                <xs:element name="initialStock" type="xs:int" />
+                <xs:element name="lowStockThreshold" type="xs:int" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="AddSupplierProductResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="supplierProductRef" type="xs:string" />
+                <xs:element name="status" type="xs:string" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element> -->
+
+    <xs:element name="GetSupplierCatalogRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="supplierCode" type="xs:string" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="GetSupplierCatalogResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="product" type="tns:SupplierProduct" maxOccurs="unbounded" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="GetInventoryByProductRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="supplierProductRef" type="xs:string" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="GetInventoryByProductResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="inventory" type="tns:Inventory" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="GetInventoryBulkRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="supplierCode" type="xs:string" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="GetInventoryBulkResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="inventory" type="tns:Inventory" maxOccurs="unbounded" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="UpdateStockRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="supplierProductRef" type="xs:string" />
+                <xs:element name="newStock" type="xs:int" />
+                <xs:element name="reason" type="xs:string" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="UpdateStockResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="status" type="xs:string" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="GetLowStockProductsRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="supplierCode" type="xs:string" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="GetLowStockProductsResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="inventory" type="tns:Inventory" maxOccurs="unbounded" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="GetSupplierSummaryRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="supplierCode" type="xs:string" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="GetSupplierSummaryResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="summary" type="tns:SupplierSummary" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="DeactivateSupplierProductRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="supplierProductRef" type="xs:string" />
+                <xs:element name="reason" type="xs:string" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="DeactivateSupplierProductResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="status" type="xs:string" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>

@@ -2,10 +2,12 @@ import { Routes } from '@angular/router';
 import { LoginComponent } from './components/login/login.component';
 import { RegisterComponent } from './components/register/register.component';
 import { ProductListComponent } from './components/product-list/product-list.component';
+import { SupplierComponent } from './components/supplier/supplier-list.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'product-list', component: ProductListComponent },
+  { path: 'supplier-list', component: SupplierComponent },
   { path: '', redirectTo: '/login', pathMatch: 'full' }
 ];
